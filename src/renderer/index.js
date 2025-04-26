@@ -7,9 +7,24 @@ marked.setOptions({
     }
     return hljs.highlightAuto(code).value;
   },
+  langPrefix: 'hljs language-',
   breaks: true,
   gfm: true
 });
+
+document.head.insertAdjacentHTML('beforeend', `
+<style>
+  #preview pre code {
+    display: block;
+    overflow-x: auto;
+    padding: lem;
+    border-radius: 4px;
+  }
+  #preview code {
+    font-family: 'SFMono-Regular', 'Consolas', 'Liberation Mono', Menlo, monospace;
+  }
+</style>
+`);
 
 const preview = document.getElementById('preview');
 const themeSelector = document.getElementById('theme-selector');
@@ -25,6 +40,18 @@ const sidebar = document.querySelector('.sidebar');
 let currentFilePath = null;
 let themes = [];
 
+const fileIcons = {
+  'md': 'fa-file-alt',
+  'txt': 'fa-file-alt',
+  'js': 'fa-file-code',
+  'html': 'fa-file-code',
+  'css': 'fa-file-code',
+  'json': 'fa-file-code',
+  'img': 'fa-file-image',
+  'dir': 'fa-folder',
+  'default': 'fa-file'
+};
+
 // Initialiser l'éditeur avant d'essayer d'appliquer un thème
 async function initEditor() {
   const textarea = document.getElementById('editor');
@@ -32,7 +59,7 @@ async function initEditor() {
     console.error('Textarea #editor not found');
     return;
   }
-  
+
   editor = CodeMirror.fromTextArea(textarea, {
     mode: 'markdown',
     lineNumbers: true,
@@ -70,7 +97,7 @@ async function initEditor() {
   });
 
   editor.focus();
-  
+
   // Charger les thèmes après l'initialisation de l'éditeur
   await loadThemes();
 }
@@ -81,7 +108,7 @@ async function loadThemes() {
     themeSelector.innerHTML = themes.themes.map(theme =>
       `<option value="${theme.id}">${theme.name}</option>`
     ).join('');
-    
+
     // S'assurer que themes.themes existe et n'est pas vide
     if (themes.themes && themes.themes.length > 0) {
       themeSelector.value = themes.themes[0].id;
@@ -95,7 +122,7 @@ async function loadThemes() {
 function applyTheme(themeId) {
   // Vérifier que editor est défini et que themes.themes existe
   if (!editor || !themes.themes) return;
-  
+
   const theme = themes.themes.find(t => t.id === themeId);
   if (!theme) return;
 
@@ -255,7 +282,7 @@ async function loadProjects() {
           const fileName = await window.electronAPI.promptFileName();
           if (fileName) {
             const filePath = await window.electronAPI.createFile(projectPath, fileName);
-            
+
             // Rafraîchir la liste des fichiers
             projectItem.querySelector('.project-header').click();
             alert(`Fichier créé : ${filePath}`);
@@ -277,3 +304,185 @@ initEditor().then(() => {
   loadProjects();
   preview.innerHTML = marked.parse('');
 });
+
+function getFileIcon(filename) {
+  if (!filename) return fileIcons.default;
+  const ext = filename.split('.').pop().toLowerCase();
+  return fileIcons[ext] || fileIcons.default;
+}
+
+async function loadProjects() {
+  try {
+    const projects = await window.electronAPI.getProjects();
+    projectList.innerHTML = '';
+
+    projects.forEach(project => {
+      const projectItem = document.createElement('div');
+      projectItem.className = 'project-item';
+      projectItem.dataset.path = project.path;
+      projectItem.innerHTML = `
+        <div class="project-header">
+          <i class="fas fa-project-diagram"></i>
+          <span class="project-name">${project.name}</span>
+          <div class="project-actions">
+            <button class="icon-btn new-file-btn" title="Nouveau fichier"><i class="fas fa-file-plus"></i></button>
+            <button class="icon-btn new-folder-btn" title="Nouveau dossier"><i class="fas fa-folder-plus"></i></button>
+            <button class="icon-btn delete-project-btn" title="Supprimer le projet"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+        <div class="file-list-container">
+          <ul class="file-list"></ul>
+        </div>
+      `;
+
+      projectList.appendChild(projectItem);
+
+      // Événements pour les boutons d'action du projet
+      projectItem.querySelector('.delete-project-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        if (confirm(`Êtes-vous sûr de vouloir supprimer le projet "${project.name}" ?`)) {
+          await window.electronAPI.deleteProject(project.path);
+          loadProjects();
+        }
+      });
+
+      projectItem.querySelector('.new-file-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const fileName = await window.electronAPI.promptFileName();
+        if (fileName) {
+          await window.electronAPI.createFile(project.path, fileName);
+          loadProjectFiles(projectItem, project.path);
+        }
+      });
+
+      projectItem.querySelector('.new-folder-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const folderName = await window.electronAPI.promptFolderName();
+        if (folderName) {
+          await window.electronAPI.createFolder(project.path, folderName);
+          loadProjectFiles(projectItem, project.path);
+        }
+      });
+
+      // Charger les fichiers du projet
+      projectItem.querySelector('.project-header').addEventListener('click', () => {
+        projectItem.classList.toggle('expanded');
+        if (projectItem.classList.contains('expanded')) {
+          loadProjectFiles(projectItem, project.path);
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error loading projects:', error);
+    alert('Erreur lors du chargement des projets.');
+  }
+}
+
+async function loadProjectFiles(projectItem, projectPath) {
+  try {
+    const fileList = projectItem.querySelector('.file-list');
+    fileList.innerHTML = '<li class="loading">Chargement...</li>';
+
+    const files = await window.electronAPI.getProjectFiles(projectPath);
+
+    fileList.innerHTML = '';
+    files.forEach(file => {
+      const fileItem = document.createElement('li');
+      fileItem.className = file.isDirectory ? 'directory-item' : 'file-item';
+      fileItem.dataset.path = file.path;
+      fileItem.dataset.isDir = file.isDirectory;
+
+      const icon = file.isDirectory ? fileIcons.dir : getFileIcon(file.name);
+
+      fileItem.innerHTML = `
+        <div class="file-entry">
+          <i class="fas ${icon}"></i>
+          <span class="file-name">${file.name}</span>
+          <div class="file-actions">
+            ${file.isDirectory ?
+          `<button class="icon-btn new-file-in-dir-btn" title="Nouveau fichier"><i class="fas fa-file-plus"></i></button>` : ''}
+            <button class="icon-btn delete-file-btn" title="Supprimer"><i class="fas fa-trash-alt"></i></button>
+          </div>
+        </div>
+        ${file.isDirectory ? '<ul class="nested-file-list"></ul>' : ''}
+      `;
+
+      fileList.appendChild(fileItem);
+
+      // Ajouter les événements
+      if (file.isDirectory) {
+        fileItem.querySelector('.file-entry').addEventListener('click', () => {
+          fileItem.classList.toggle('expanded');
+          if (fileItem.classList.contains('expanded')) {
+            loadDirectoryFiles(fileItem, file.path);
+          }
+        });
+
+        if (fileItem.querySelector('.new-file-in-dir-btn')) {
+          fileItem.querySelector('.new-file-in-dir-btn').addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const fileName = await window.electronAPI.promptFileName();
+            if (fileName) {
+              await window.electronAPI.createFile(file.path, fileName);
+              loadDirectoryFiles(fileItem, file.path);
+            }
+          });
+        }
+      } else {
+        fileItem.querySelector('.file-entry').addEventListener('click', async () => {
+          try {
+            const result = await window.electronAPI.openFile(fileItem.dataset.path);
+            if (result) {
+              editor.setValue(result.content);
+              preview.innerHTML = marked.parse(result.content);
+              currentFilePath = result.filePath;
+              // Marquer ce fichier comme actif
+              document.querySelectorAll('.file-item.active').forEach(item => item.classList.remove('active'));
+              fileItem.classList.add('active');
+            }
+          } catch (error) {
+            console.error('Error opening file:', error);
+            alert('Erreur lors de l\'ouverture du fichier.');
+          }
+        });
+      }
+
+      fileItem.querySelector('.delete-file-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const isDir = fileItem.dataset.isDir === 'true';
+        const message = isDir ?
+          `Êtes-vous sûr de vouloir supprimer le dossier "${file.name}" et tout son contenu ?` :
+          `Êtes-vous sûr de vouloir supprimer le fichier "${file.name}" ?`;
+
+        if (confirm(message)) {
+          await window.electronAPI.deleteFileOrFolder(fileItem.dataset.path, isDir);
+          fileItem.remove();
+        }
+      });
+    });
+  } catch (error) {
+    console.error('Error loading project files:', error);
+    const fileList = projectItem.querySelector('.file-list');
+    fileList.innerHTML = '<li class="error">Erreur de chargement</li>';
+  }
+}
+
+async function loadDirectoryFiles(dirItem, dirPath) {
+  try {
+    const nestedList = dirItem.querySelector('.nested-file-list');
+    nestedList.innerHTML = '<li class="loading">Chargement...</li>';
+
+    const files = await window.electronAPI.getDirectoryFiles(dirPath);
+
+    nestedList.innerHTML = '';
+    files.forEach(file => {
+      // Code similaire à loadProjectFiles pour chaque fichier
+      // ...
+
+    });
+  } catch (error) {
+    console.error('Error loading directory files:', error);
+    const nestedList = dirItem.querySelector('.nested-file-list');
+    nestedList.innerHTML = '<li class="error">Erreur de chargement</li>';
+  }
+}

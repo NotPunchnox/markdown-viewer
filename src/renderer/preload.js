@@ -15,4 +15,21 @@ contextBridge.exposeInMainWorld('electronAPI', {
   },
   getThemes: () => ipcRenderer.invoke('get-themes'),
   saveTheme: (themes) => ipcRenderer.invoke('save-theme', themes),
+
+  deleteProject: async (projectPath) => {
+    return await ipcRenderer.invoke('delete-project', projectPath);
+  },
+  createFolder: async (parentPath, folderName) => {
+    return await ipcRenderer.invoke('create-folder', parentPath, folderName);
+  },
+  promptFolderName: async () => {
+    return await ipcRenderer.invoke('prompt-folder-name');
+  },
+  getDirectoryFiles: async (dirPath) => {
+    return await ipcRenderer.invoke('get-directory-files', dirPath);
+  },
+  deleteFileOrFolder: async (path, isDirectory) => {
+    return await ipcRenderer.invoke('delete-file-or-folder', path, isDirectory);
+  }
+
 });
