@@ -15,7 +15,9 @@ const openFileBtn = document.getElementById('open-file-btn');
 const saveFileBtn = document.getElementById('save-file-btn');
 const exportPdfBtn = document.getElementById('export-pdf-btn');
 const newProjectBtn = document.getElementById('new-project-btn');
+const toggleSidebarBtn = document.getElementById('toggle-sidebar-btn');
 const projectList = document.getElementById('project-list');
+const sidebar = document.querySelector('.sidebar');
 
 let currentFilePath = null;
 let themes = [];
@@ -31,11 +33,21 @@ async function loadThemes() {
 function applyTheme(themeId) {
   const theme = themes.themes.find(t => t.id === themeId);
   if (!theme) return;
+  // Éditeur
   editor.style.background = theme.editor.background;
   editor.style.color = theme.editor.color;
   editor.style.border = `1px solid ${theme.editor.border}`;
+  // Prévisualisation
   preview.style.background = theme.preview.background;
   preview.style.color = theme.preview.color;
+  // Sidebar
+  sidebar.style.background = theme.sidebar.background;
+  sidebar.style.color = theme.sidebar.color;
+  // Toolbar
+  document.querySelector('.toolbar').style.background = theme.toolbar.background;
+  document.querySelector('.toolbar').style.color = theme.toolbar.color;
+  // Body
+  document.body.style.background = theme.body.background;
   document.body.className = `theme-${themeId}`;
 }
 
@@ -87,29 +99,39 @@ newProjectBtn.addEventListener('click', async () => {
   }
 });
 
+toggleSidebarBtn.addEventListener('click', () => {
+  sidebar.classList.toggle('hidden');
+});
+
 async function loadProjects() {
   const projects = await window.electronAPI.getProjects();
   projectList.innerHTML = '';
   for (const project of projects) {
     const projectItem = document.createElement('li');
     projectItem.textContent = project.name;
+    projectItem.dataset.path = project.path; // Stocker le chemin
     projectItem.addEventListener('click', async (e) => {
       e.stopPropagation();
-      const files = await window.electronAPI.getProjectFiles(project.path);
-      projectItem.innerHTML = `${project.name}<ul>${files.map(file => 
-        `<li class="file" data-path="${file.path}">${file.name}</li>`
-      ).join('')}</ul>`;
-      projectItem.querySelectorAll('.file').forEach(fileItem => {
-        fileItem.addEventListener('click', async (e) => {
-          e.stopPropagation();
-          const result = await window.electronAPI.openFile(fileItem.dataset.path);
-          if (result) {
-            editor.value = result.content;
-            preview.innerHTML = marked.parse(result.content);
-            currentFilePath = result.filePath;
-          }
+      const projectPath = projectItem.dataset.path;
+      try {
+        const files = await window.electronAPI.getProjectFiles(projectPath);
+        projectItem.innerHTML = `${project.name}<ul>${files.map(file => 
+          `<li class="file" data-path="${file.path}">${file.name}</li>`
+        ).join('')}</ul>`;
+        projectItem.querySelectorAll('.file').forEach(fileItem => {
+          fileItem.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const result = await window.electronAPI.openFile(fileItem.dataset.path);
+            if (result) {
+              editor.value = result.content;
+              preview.innerHTML = marked.parse(result.content);
+              currentFilePath = result.filePath;
+            }
+          });
         });
-      });
+      } catch (error) {
+        console.error('Error loading project files:', error);
+      }
     });
     projectList.appendChild(projectItem);
   }

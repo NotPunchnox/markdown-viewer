@@ -31,7 +31,6 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit();
 });
 
-// Gestion des fichiers
 ipcMain.handle('save-file', async (event, content, filePath) => {
   if (!filePath) {
     const { filePath: newFilePath } = await dialog.showSaveDialog({
@@ -106,6 +105,9 @@ ipcMain.handle('get-projects', async () => {
 });
 
 ipcMain.handle('get-project-files', async (event, projectPath) => {
+  if (!projectPath || typeof projectPath !== 'string') {
+    throw new Error('Invalid project path');
+  }
   const files = await fs.readdir(projectPath, { withFileTypes: true });
   return files
     .filter(dirent => dirent.isFile() && dirent.name.endsWith('.md'))

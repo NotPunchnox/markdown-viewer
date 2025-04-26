@@ -1,43 +1,76 @@
 {
-    "themes": [
-      {
-        "name": "Light",
-        "id": "light",
-        "editor": {
-          "background": "#ffffff",
-          "color": "#333333",
-          "border": "#e0e0e0"
-        },
-        "preview": {
-          "background": "#ffffff",
-          "color": "#333333"
-        }
+  "themes": [
+    {
+      "name": "Light",
+      "id": "light",
+      "editor": {
+        "background": "#ffffff",
+        "color": "#333333",
+        "border": "#e0e0e0"
       },
-      {
-        "name": "Dark",
-        "id": "dark",
-        "editor": {
-          "background": "#2d2d2d",
-          "color": "#ffffff",
-          "border": "#444444"
-        },
-        "preview": {
-          "background": "#2d2d2d",
-          "color": "#ffffff"
-        }
+      "preview": {
+        "background": "#ffffff",
+        "color": "#333333"
       },
-      {
-        "name": "Solarized",
-        "id": "solarized",
-        "editor": {
-          "background": "#fdf6e3",
-          "color": "#657b83",
-          "border": "#e0e0e0"
-        },
-        "preview": {
-          "background": "#fdf6e3",
-          "color": "#657b83"
-        }
+      "sidebar": {
+        "background": "#f8f8f8",
+        "color": "#333333"
+      },
+      "toolbar": {
+        "background": "#ffffff",
+        "color": "#333333"
+      },
+      "body": {
+        "background": "#f5f5f5"
       }
-    ]
-  }
+    },
+    {
+      "name": "Dark",
+      "id": "dark",
+      "editor": {
+        "background": "#2d2d2d",
+        "color": "#ffffff",
+        "border": "#444444"
+      },
+      "preview": {
+        "background": "#2d2d2d",
+        "color": "#ffffff"
+      },
+      "sidebar": {
+        "background": "#1e1e1e",
+        "color": "#ffffff"
+      },
+      "toolbar": {
+        "background": "#252525",
+        "color": "#ffffff"
+      },
+      "body": {
+        "background": "#1a1a1a"
+      }
+    },
+    {
+      "name": "Solarized",
+      "id": "solarized",
+      "editor": {
+        "background": "#fdf6e3",
+        "color": "#657b83",
+        "border": "#e0e0e0"
+      },
+      "preview": {
+        "background": "#fdf6e3",
+        "color": "#657b83"
+      },
+      "sidebar": {
+        "background": "#eee8d5",
+        "color": "#657b83"
+      },
+      "toolbar": {
+        "background": "#fdf6e3",
+        "color": "#657b83"
+      },
+      "body": {
+        "background": "#eee8d5"
+      }
+    }
+  ]
+}
