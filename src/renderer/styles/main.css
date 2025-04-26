@@ -1,0 +1,118 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f5f5f5;
+  transition: all 0.3s ease;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar {
+  width: 250px;
+  background: #ffffff;
+  border-right: 1px solid #e0e0e0;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.project-manager h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+#new-project-btn {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+#new-project-btn:hover {
+  background: #f0f0f0;
+}
+
+#project-list {
+  list-style: none;
+  padding: 0;
+}
+
+#project-list li {
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+#project-list li:hover {
+  background: #f0f0f0;
+}
+
+#project-list .file {
+  padding-left: 20px;
+  font-size: 14px;
+}
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  padding: 10px;
+  background: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.toolbar select, .toolbar button {
+  padding: 8px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  background: white;
+  cursor: pointer;
+}
+
+.toolbar button:hover {
+  background: #f0f0f0;
+}
+
+.editor-container {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  padding: 20px;
+}
+
+#editor {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 8px;
+  padding: 15px;
+  resize: none;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+#preview {
+  background: white;
+  border-radius: 8px;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+/* Styles pour la prévisualisation Markdown */
+#preview h1 { font-size: 24px; margin: 20px 0 10px; }
+#preview h2 { font-size: 20px; margin: 15px 0 8px; }
+#preview p { margin: 10px 0; }
+#preview code { background: #f0f0f0; padding: 2px 4px; border-radius: 4px; }
+#preview pre { background: #f0f0f0; padding: 10px; border-radius: 4px; }

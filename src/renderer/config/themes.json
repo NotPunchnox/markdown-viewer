@@ -1,0 +1,43 @@
+{
+    "themes": [
+      {
+        "name": "Light",
+        "id": "light",
+        "editor": {
+          "background": "#ffffff",
+          "color": "#333333",
+          "border": "#e0e0e0"
+        },
+        "preview": {
+          "background": "#ffffff",
+          "color": "#333333"
+        }
+      },
+      {
+        "name": "Dark",
+        "id": "dark",
+        "editor": {
+          "background": "#2d2d2d",
+          "color": "#ffffff",
+          "border": "#444444"
+        },
+        "preview": {
+          "background": "#2d2d2d",
+          "color": "#ffffff"
+        }
+      },
+      {
+        "name": "Solarized",
+        "id": "solarized",
+        "editor": {
+          "background": "#fdf6e3",
+          "color": "#657b83",
+          "border": "#e0e0e0"
+        },
+        "preview": {
+          "background": "#fdf6e3",
+          "color": "#657b83"
+        }
+      }
+    ]
+  }
