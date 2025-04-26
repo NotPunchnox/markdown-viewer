@@ -105,8 +105,9 @@ ipcMain.handle('get-projects', async () => {
 });
 
 ipcMain.handle('get-project-files', async (event, projectPath) => {
+  console.log('Received projectPath:', projectPath);
   if (!projectPath || typeof projectPath !== 'string') {
-    throw new Error('Invalid project path');
+    throw new Error('Invalid project path: ' + JSON.stringify(projectPath));
   }
   const files = await fs.readdir(projectPath, { withFileTypes: true });
   return files

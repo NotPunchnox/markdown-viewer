@@ -7,7 +7,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
   createProject: (projectName) => ipcRenderer.invoke('create-project', projectName),
   promptProjectName: () => ipcRenderer.invoke('prompt-project-name'),
   getProjects: () => ipcRenderer.invoke('get-projects'),
-  getProjectFiles: (projectPath) => ipcRenderer.invoke('get-project-files'),
+  getProjectFiles: (projectPath) => {
+    console.log('IPC Sending projectPath:', projectPath); // Débogage
+    return ipcRenderer.invoke('get-project-files', projectPath);
+  },
   getThemes: () => ipcRenderer.invoke('get-themes'),
   saveTheme: (themes) => ipcRenderer.invoke('save-theme', themes),
 });

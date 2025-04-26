@@ -5,8 +5,11 @@
   <title>Markdown Editor</title>
   <link rel="stylesheet" href="styles/main.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.0/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/markdown/markdown.min.js"></script>
 </head>
 <body>
   <div class="container">
@@ -27,7 +30,7 @@
         <button id="export-pdf-btn">Exporter PDF</button>
       </div>
       <div class="editor-container">
-        <textarea id="editor" placeholder="Écrivez votre Markdown ici..."></textarea>
+        <textarea id="editor"></textarea>
         <div id="preview"></div>
       </div>
     </div>

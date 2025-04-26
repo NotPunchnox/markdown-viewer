@@ -1,3 +1,5 @@
+let editor;
+
 marked.setOptions({
   highlight: function(code, lang) {
     if (lang && hljs.getLanguage(lang)) {
@@ -7,7 +9,6 @@ marked.setOptions({
   }
 });
 
-const editor = document.getElementById('editor');
 const preview = document.getElementById('preview');
 const themeSelector = document.getElementById('theme-selector');
 const newFileBtn = document.getElementById('new-file-btn');
@@ -33,34 +34,48 @@ async function loadThemes() {
 function applyTheme(themeId) {
   const theme = themes.themes.find(t => t.id === themeId);
   if (!theme) return;
-  // Éditeur
-  editor.style.background = theme.editor.background;
-  editor.style.color = theme.editor.color;
-  editor.style.border = `1px solid ${theme.editor.border}`;
-  // Prévisualisation
+  editor.getWrapperElement().style.background = theme.editor.background;
+  editor.getWrapperElement().style.color = theme.editor.color;
+  editor.getWrapperElement().style.border = `1px solid ${theme.editor.border}`;
   preview.style.background = theme.preview.background;
   preview.style.color = theme.preview.color;
-  // Sidebar
   sidebar.style.background = theme.sidebar.background;
   sidebar.style.color = theme.sidebar.color;
-  // Toolbar
   document.querySelector('.toolbar').style.background = theme.toolbar.background;
   document.querySelector('.toolbar').style.color = theme.toolbar.color;
-  // Body
   document.body.style.background = theme.body.background;
   document.body.className = `theme-${themeId}`;
 }
 
-editor.addEventListener('input', () => {
-  preview.innerHTML = marked.parse(editor.value);
-});
+async function initEditor() {
+  const textarea = document.getElementById('editor');
+  editor = CodeMirror.fromTextArea(textarea, {
+    mode: 'markdown',
+    lineNumbers: true,
+    theme: 'default',
+    lineWrapping: true
+  });
+  editor.on('change', () => {
+    preview.innerHTML = marked.parse(editor.getValue());
+  });
+  editor.on('scroll', () => {
+    const scrollInfo = editor.getScrollInfo();
+    const scrollPercentage = scrollInfo.top / (scrollInfo.height - scrollInfo.clientHeight);
+    preview.scrollTop = scrollPercentage * (preview.scrollHeight - preview.clientHeight);
+  });
+  preview.addEventListener('scroll', () => {
+    const scrollPercentage = preview.scrollTop / (preview.scrollHeight - preview.clientHeight);
+    const scrollInfo = editor.getScrollInfo();
+    editor.scrollTo(0, scrollPercentage * (scrollInfo.height - scrollInfo.clientHeight));
+  });
+}
 
 themeSelector.addEventListener('change', () => {
   applyTheme(themeSelector.value);
 });
 
 newFileBtn.addEventListener('click', () => {
-  editor.value = '';
+  editor.setValue('');
   preview.innerHTML = '';
   currentFilePath = null;
 });
@@ -68,14 +83,14 @@ newFileBtn.addEventListener('click', () => {
 openFileBtn.addEventListener('click', async () => {
   const result = await window.electronAPI.openFile();
   if (result) {
-    editor.value = result.content;
+    editor.setValue(result.content);
     preview.innerHTML = marked.parse(result.content);
     currentFilePath = result.filePath;
   }
 });
 
 saveFileBtn.addEventListener('click', async () => {
-  const content = editor.value;
+  const content = editor.getValue();
   const filePath = await window.electronAPI.saveFile(content, currentFilePath);
   if (filePath) {
     currentFilePath = filePath;
@@ -84,7 +99,7 @@ saveFileBtn.addEventListener('click', async () => {
 });
 
 exportPdfBtn.addEventListener('click', async () => {
-  const content = editor.value;
+  const content = editor.getValue();
   const filePath = await window.electronAPI.exportPDF(content);
   if (filePath) {
     alert(`PDF exporté à : ${filePath}`);
@@ -109,10 +124,15 @@ async function loadProjects() {
   for (const project of projects) {
     const projectItem = document.createElement('li');
     projectItem.textContent = project.name;
-    projectItem.dataset.path = project.path; // Stocker le chemin
+    projectItem.dataset.path = project.path;
     projectItem.addEventListener('click', async (e) => {
       e.stopPropagation();
       const projectPath = projectItem.dataset.path;
+      console.log('Sending projectPath:', projectPath);
+      if (!projectPath) {
+        console.error('Project path is undefined');
+        return;
+      }
       try {
         const files = await window.electronAPI.getProjectFiles(projectPath);
         projectItem.innerHTML = `${project.name}<ul>${files.map(file => 
@@ -123,7 +143,7 @@ async function loadProjects() {
             e.stopPropagation();
             const result = await window.electronAPI.openFile(fileItem.dataset.path);
             if (result) {
-              editor.value = result.content;
+              editor.setValue(result.content);
               preview.innerHTML = marked.parse(result.content);
               currentFilePath = result.filePath;
             }
@@ -137,6 +157,7 @@ async function loadProjects() {
   }
 }
 
+initEditor();
 loadThemes();
 loadProjects();
-preview.innerHTML = marked.parse(editor.value);
+preview.innerHTML = marked.parse('');

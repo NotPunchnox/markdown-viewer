@@ -3,11 +3,22 @@
   "version": "1.0.0",
   "description": "A minimalist Markdown editor with theme support and PDF export",
   "main": "src/main/main.js",
+  "author": "punchnox",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder"
   },
-  "author": "punchnox",
+  "dependencies": {
+    "codemirror": "^5.65.19",
+    "electron-prompt": "^1.7.0",
+    "fs-extra": "^11.2.0",
+    "marked": "^15.0.11",
+    "pdfkit": "^0.15.0"
+  },
+  "devDependencies": {
+    "electron": "^28.2.3",
+    "electron-builder": "^24.9.1"
+  },
   "build": {
     "appId": "com.example.markdowneditor",
     "productName": "Markdown Editor",
@@ -17,16 +28,5 @@
       ],
       "category": "Utility"
     }
-  },
-  "keywords": [],
-  "license": "ISC",
-  "type": "commonjs",
-  "dependencies": {
-    "electron": "^35.2.1",
-    "electron-builder": "^26.0.12",
-    "electron-prompt": "^1.7.0",
-    "highlight.js": "^11.11.1",
-    "marked": "^15.0.11",
-    "pdfkit": "^0.17.0"
   }
 }

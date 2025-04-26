@@ -1,6 +1,30 @@
 {
   "themes": [
     {
+      "name": "Dracula",
+      "id": "dracula",
+      "editor": {
+        "background": "#282a36",
+        "color": "#f8f8f2",
+        "border": "#44475a"
+      },
+      "preview": {
+        "background": "#282a36",
+        "color": "#f8f8f2"
+      },
+      "sidebar": {
+        "background": "#21222c",
+        "color": "#f8f8f2"
+      },
+      "toolbar": {
+        "background": "#191a21",
+        "color": "#f8f8f2"
+      },
+      "body": {
+        "background": "#1e1f29"
+      }
+    },
+    {
       "name": "Light",
       "id": "light",
       "editor": {
@@ -46,30 +70,6 @@
       },
       "body": {
         "background": "#1a1a1a"
-      }
-    },
-    {
-      "name": "Solarized",
-      "id": "solarized",
-      "editor": {
-        "background": "#fdf6e3",
-        "color": "#657b83",
-        "border": "#e0e0e0"
-      },
-      "preview": {
-        "background": "#fdf6e3",
-        "color": "#657b83"
-      },
-      "sidebar": {
-        "background": "#eee8d5",
-        "color": "#657b83"
-      },
-      "toolbar": {
-        "background": "#fdf6e3",
-        "color": "#657b83"
-      },
-      "body": {
-        "background": "#eee8d5"
       }
     }
   ]
