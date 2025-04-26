@@ -1,97 +1,213 @@
-body {
+/* Réinitialisation de base */
+* {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  transition: all 0.3s ease;
+  padding: 0;
+  box-sizing: border-box;
 }
 
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: background 0.3s ease, color 0.3s ease;
+  overflow: hidden;
+}
+
+/* Conteneur principal */
 .container {
   display: flex;
   height: 100vh;
 }
 
+/* Sidebar */
 .sidebar {
-  width: 250px;
-  padding: 15px;
+  width: 260px;
+  padding: 20px;
   overflow-y: auto;
   transition: transform 0.3s ease;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
 }
 
 .sidebar.hidden {
-  transform: translateX(-250px);
+  transform: translateX(-260px);
   width: 0;
   padding: 0;
 }
 
+.project-manager h3 {
+  font-size: 18px;
+  margin-bottom: 15px;
+  font-weight: 600;
+}
+
+#new-project-btn {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+#new-project-btn:hover {
+  opacity: 0.9;
+}
+
+#project-list {
+  list-style: none;
+}
+
+#project-list li {
+  padding: 10px;
+  cursor: pointer;
+  border-radius: 6px;
+  margin-bottom: 5px;
+  font-size: 14px;
+  transition: background 0.2s ease;
+}
+
+#project-list li:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+#project-list .project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#project-list .file {
+  padding-left: 20px;
+  font-size: 13px;
+}
+
+#project-list .file-list {
+  list-style: none;
+  margin-top: 5px;
+}
+
+.new-file-project-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+/* Contenu principal */
 .main-content {
   flex: 1;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
+/* Toolbar */
 .toolbar {
-  padding: 10px;
+  padding: 12px 20px;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
 }
 
 .toolbar select,
 .toolbar button {
-  padding: 8px;
+  padding: 8px 12px;
   border: none;
-  border-radius: 4px;
+  border-radius: 6px;
   cursor: pointer;
+  font-size: 14px;
   background: transparent;
-  color: inherit;
+  transition: background 0.2s ease;
 }
 
 .toolbar button:hover {
-  opacity: 0.8;
+  background: rgba(0, 0, 0, 0.1);
 }
 
 #toggle-sidebar-btn {
-  font-size: 16px;
-  padding: 8px 12px;
+  font-size: 18px;
+  padding: 8px;
 }
 
+/* Conteneur éditeur/prévisualisation */
 .editor-container {
   flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
   padding: 20px;
-  min-height: 100%;
-  /* Hauteur minimale augmentée */
+  overflow: hidden;
 }
 
+/* Textarea (caché pour CodeMirror) */
+#editor {
+  display: block;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  position: absolute;
+}
+
+/* Éditeur CodeMirror */
 .CodeMirror {
   height: 100%;
+  width: 100%;
   border-radius: 8px;
   padding: 15px;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
   font-family: 'Courier New', monospace;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+  user-select: text;
+  pointer-events: auto;
+  opacity: 1;
+  z-index: 1;
 }
 
+.CodeMirror-scroll {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.CodeMirror-linenumbers {
+  padding-right: 12px;
+}
+
+.CodeMirror-linenumber {
+  font-size: 13px;
+}
+
+.CodeMirror-cursor {
+  border-left: 2px solid;
+}
+
+/* Prévisualisation */
 #preview {
   border-radius: 8px;
   padding: 15px;
   overflow-y: auto;
-  font-size: 14px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 #preview h1 {
   font-size: 28px;
   margin: 20px 0 10px;
-  border-bottom: 2px solid #e0e0e0;
-  padding-bottom: 5px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+  padding-bottom: 8px;
 }
 
 #preview h2 {
   font-size: 22px;
   margin: 15px 0 8px;
-  border-bottom: 1px solid #e0e0e0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 #preview h3 {
@@ -105,14 +221,14 @@ body {
 }
 
 #preview code {
-  background: #f5f5f5;
+  background: rgba(0, 0, 0, 0.1);
   padding: 3px 6px;
   border-radius: 4px;
   font-family: 'Courier New', monospace;
 }
 
 #preview pre {
-  background: #f5f5f5;
+  background: rgba(0, 0, 0, 0.1);
   padding: 15px;
   border-radius: 6px;
   overflow-x: auto;
@@ -130,10 +246,10 @@ body {
 }
 
 #preview blockquote {
-  border-left: 4px solid #e0e0e0;
+  border-left: 4px solid rgba(0, 0, 0, 0.2);
   padding-left: 15px;
   margin: 10px 0;
-  color: #666;
+  opacity: 0.8;
 }
 
 #preview a {
@@ -145,285 +261,169 @@ body {
   text-decoration: underline;
 }
 
-.project-manager h3 {
-  margin: 0 0 10px;
-  font-size: 16px;
-}
-
-#new-project-btn {
-  width: 100%;
-  padding: 8px;
-  margin-bottom: 10px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-#new-project-btn:hover {
-  opacity: 0.8;
-}
-
-#project-list {
-  list-style: none;
-  padding: 0;
-}
-
-#project-list li {
-  padding: 8px;
-  cursor: pointer;
-  border-radius: 4px;
-}
-
-#project-list li:hover {
-  opacity: 0.8;
-}
-
-#project-list .file {
-  padding-left: 20px;
-  font-size: 14px;
-}
-
-.CodeMirror {
-  height: 100%;
-  border-radius: 8px;
-  padding: 15px;
-  font-size: 14px;
-  line-height: 1.6;
-  font-family: 'Fira Code', 'Courier New', monospace;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.CodeMirror-scroll {
-  overflow-x: auto !important;
-}
-
-.CodeMirror-linenumbers {
-  background: transparent !important;
-  color: #888 !important;
-  padding-right: 10px;
-}
-
-.CodeMirror-cursor {
-  border-left: 2px solid #fff !important;
-}
-
-.CodeMirror-selected {
-  background: rgba(255, 255, 255, 0.1) !important;
-}
-
-/* Styles pour thèmes spécifiques */
-.theme-dracula .CodeMirror {
-  background: #282a36 !important;
-  color: #f8f8f2 !important;
-}
-
-.theme-dracula .CodeMirror-linenumbers {
-  color: #6272a4 !important;
-}
-
-.theme-dracula .CodeMirror-cursor {
-  border-left-color: #50fa7b !important;
-}
-
-.theme-dracula .CodeMirror-selected {
-  background: rgba(80, 250, 123, 0.2) !important;
-}
-
-.theme-light .CodeMirror {
-  background: #ffffff !important;
-  color: #333333 !important;
-}
-
-.theme-light .CodeMirror-linenumbers {
-  color: #999 !important;
-}
-
-.theme-light .CodeMirror-cursor {
-  border-left-color: #333 !important;
-}
-
-.theme-dark .CodeMirror {
-  background: #2d2d2d !important;
-  color: #ffffff !important;
-}
-
-.theme-dark .CodeMirror-linenumbers {
-  color: #666 !important;
-}
-
-.theme-dark .CodeMirror-cursor {
-  border-left-color: #fff !important;
-}
-
-.CodeMirror {
-  height: 100%;
-  /* Occupe toute la hauteur disponible */
-  min-height: 600px;
-  /* Hauteur minimale pour un grand éditeur */
-  border-radius: 8px;
-  padding: 12px;
-  font-size: 15px;
-  line-height: 1.7;
-  font-family: 'Courier New', monospace;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  border: 1px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.CodeMirror-scroll {
-  overflow-x: auto !important;
-}
-
-.CodeMirror-linenumbers {
-  background: transparent !important;
-  padding-right: 10px;
-}
-
-.CodeMirror-linenumber {
-  color: #aaa !important;
-}
-
-.CodeMirror-cursor {
-  border-left: 2px solid #333 !important;
-}
-
-.CodeMirror-selected {
-  background: rgba(0, 0, 0, 0.2) !important;
-}
-
-/* Colorations syntaxiques personnalisées */
-.cm-header {
-  color: #ff79c6 !important;
-}
-
-/* Titres */
-.cm-strong {
-  color: #50fa7b !important;
-  font-weight: bold;
-}
-
-/* Gras */
-.cm-em {
-  color: #50fa7b !important;
-  font-style: italic;
-}
-
-/* Italique */
-.cm-link {
-  color: #8be9fd !important;
-  text-decoration: underline;
-}
-
-/* Liens */
-.cm-quote {
-  color: #6272a4 !important;
-  font-style: italic;
-}
-
-/* Citations */
-.cm-code {
-  color: #f1fa8c !important;
-  background: rgba(0, 0, 0, 0.1);
-}
-
-/* Code inline */
-.cm-comment {
-  color: #6272a4 !important;
-}
-
-/* Commentaires */
-
 /* Styles par thème */
-.theme-dracula .CodeMirror {
-  background: #282a36 !important;
-  color: #f8f8f2 !important;
-  border-color: #44475a !important;
+.theme-dracula {
+  --editor-bg: #282a36;
+  --editor-color: #f8f8f2;
+  --editor-border: #44475a;
+  --preview-bg: #282a36;
+  --preview-color: #f8f8f2;
+  --sidebar-bg: #21222c;
+  --sidebar-color: #f8f8f2;
+  --toolbar-bg: #191a21;
+  --toolbar-color: #f8f8f2;
+  --body-bg: #1e1f29;
+  --button-bg: #44475a;
+  --button-hover: #555770;
 }
 
-.theme-dracula .CodeMirror-linenumber {
-  color: #6272a4 !important;
+.theme-light {
+  --editor-bg: #fafafa;
+  --editor-color: #2d2d2d;
+  --editor-border: #e0e0e0;
+  --preview-bg: #fafafa;
+  --preview-color: #2d2d2d;
+  --sidebar-bg: #f0f0f0;
+  --sidebar-color: #2d2d2d;
+  --toolbar-bg: #ffffff;
+  --toolbar-color: #2d2d2d;
+  --body-bg: #f5f5f5;
+  --button-bg: #e0e0e0;
+  --button-hover: #d0d0d0;
 }
 
-.theme-dracula .CodeMirror-cursor {
-  border-left-color: #50fa7b !important;
+.theme-dark {
+  --editor-bg: #1e1e1e;
+  --editor-color: #e0e0e0;
+  --editor-border: #333333;
+  --preview-bg: #1e1e1e;
+  --preview-color: #e0e0e0;
+  --sidebar-bg: #181818;
+  --sidebar-color: #e0e0e0;
+  --toolbar-bg: #222222;
+  --toolbar-color: #e0e0e0;
+  --body-bg: #121212;
+  --button-bg: #444444;
+  --button-hover: #555555;
 }
 
-.theme-dracula .CodeMirror-selected {
-  background: rgba(80, 250, 123, 0.2) !important;
+.theme-dracula .CodeMirror,
+.theme-light .CodeMirror,
+.theme-dark .CodeMirror {
+  background: var(--editor-bg);
+  color: var(--editor-color);
+  border-color: var(--editor-border);
 }
 
-.theme-light .CodeMirror {
-  background: #ffffff !important;
-  color: #333333 !important;
-  border-color: #e0e0e0 !important;
+.theme-dracula .CodeMirror-linenumber,
+.theme-dark .CodeMirror-linenumber {
+  color: #6272a4;
 }
 
 .theme-light .CodeMirror-linenumber {
-  color: #999 !important;
+  color: #999;
+}
+
+.theme-dracula .CodeMirror-cursor,
+.theme-dark .CodeMirror-cursor {
+  border-left-color: #50fa7b;
 }
 
 .theme-light .CodeMirror-cursor {
-  border-left-color: #333 !important;
+  border-left-color: #333;
 }
 
-.theme-light .cm-header {
-  color: #d73a49 !important;
+.theme-dracula .CodeMirror-selected,
+.theme-dark .CodeMirror-selected {
+  background: rgba(80, 250, 123, 0.2);
 }
 
-.theme-light .cm-strong {
-  color: #22863a !important;
+.theme-light .CodeMirror-selected {
+  background: rgba(0, 0, 0, 0.1);
 }
 
-.theme-light .cm-em {
-  color: #22863a !important;
+.theme-dracula #preview,
+.theme-light #preview,
+.theme-dark #preview {
+  background: var(--preview-bg);
+  color: var(--preview-color);
 }
 
-.theme-light .cm-link {
-  color: #005cc5 !important;
+.theme-dracula .sidebar,
+.theme-light .sidebar,
+.theme-dark .sidebar {
+  background: var(--sidebar-bg);
+  color: var(--sidebar-color);
 }
 
-.theme-light .cm-quote {
-  color: #6a737d !important;
+.theme-dracula .toolbar,
+.theme-light .toolbar,
+.theme-dark .toolbar {
+  background: var(--toolbar-bg);
+  color: var(--toolbar-color);
 }
 
-.theme-light .cm-code {
-  color: #24292e !important;
+.theme-dracula body,
+.theme-light body,
+.theme-dark body {
+  background: var(--body-bg);
 }
 
-.theme-dark .CodeMirror {
-  background: #2d2d2d !important;
-  color: #ffffff !important;
-  border-color: #444444 !important;
+.theme-dracula #new-project-btn,
+.theme-dark #new-project-btn,
+.theme-dracula .new-file-project-btn,
+.theme-dark .new-file-project-btn {
+  background: var(--button-bg);
+  color: #f8f8f2;
 }
 
-.theme-dark .CodeMirror-linenumber {
-  color: #666 !important;
+.theme-light #new-project-btn,
+.theme-light .new-file-project-btn {
+  background: var(--button-bg);
+  color: #333333;
 }
 
-.theme-dark .CodeMirror-cursor {
-  border-left-color: #fff !important;
+.theme-dracula #new-project-btn:hover,
+.theme-dark #new-project-btn:hover,
+.theme-dracula .new-file-project-btn:hover,
+.theme-dark .new-file-project-btn:hover {
+  background: var(--button-hover);
 }
 
-.theme-dark .cm-header {
-  color: #ff5555 !important;
+.theme-light #new-project-btn:hover,
+.theme-light .new-file-project-btn:hover {
+  background: var(--button-hover);
 }
 
-.theme-dark .cm-strong {
-  color: #55ff55 !important;
+/* Colorations syntaxiques */
+.cm-header {
+  font-weight: bold;
 }
 
-.theme-dark .cm-em {
-  color: #55ff55 !important;
-}
+.theme-dracula .cm-header { color: #ff79c6; }
+.theme-light .cm-header { color: #d73a49; }
+.theme-dark .cm-header { color: #ff5555; }
 
-.theme-dark .cm-link {
-  color: #55ffff !important;
-}
+.theme-dracula .cm-strong { color: #50fa7b; }
+.theme-light .cm-strong { color: #22863a; }
+.theme-dark .cm-strong { color: #55ff55; }
 
-.theme-dark .cm-quote {
-  color: #aaaaaa !important;
-}
+.theme-dracula .cm-em { color: #50fa7b; }
+.theme-light .cm-em { color: #22863a; }
+.theme-dark .cm-em { color: #55ff55; }
 
-.theme-dark .cm-code {
-  color: #ffff55 !important;
-}
+.theme-dracula .cm-link { color: #8be9fd; }
+.theme-light .cm-link { color: #005cc5; }
+.theme-dark .cm-link { color: #55ffff; }
+
+.theme-dracula .cm-quote { color: #6272a4; }
+.theme-light .cm-quote { color: #6a737d; }
+.theme-dark .cm-quote { color: #aaaaaa; }
+
+.theme-dracula .cm-code { color: #f1fa8c; }
+.theme-light .cm-code { color: #24292e; }
+.theme-dark .cm-code { color: #ffff55; }
+
+.theme-dracula .cm-comment { color: #6272a4; }
+.theme-light .cm-comment { color: #6a737d; }
+.theme-dark .cm-comment { color: #aaaaaa; }

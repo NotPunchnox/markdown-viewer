@@ -6,7 +6,9 @@ marked.setOptions({
       return hljs.highlight(code, { language: lang }).value;
     }
     return hljs.highlightAuto(code).value;
-  }
+  },
+  breaks: true,
+  gfm: true
 });
 
 const preview = document.getElementById('preview');
@@ -23,59 +25,101 @@ const sidebar = document.querySelector('.sidebar');
 let currentFilePath = null;
 let themes = [];
 
-async function loadThemes() {
-  themes = await window.electronAPI.getThemes();
-  themeSelector.innerHTML = themes.themes.map(theme =>
-    `<option value="${theme.id}">${theme.name}</option>`
-  ).join('');
-  applyTheme(themes.themes[0].id);
-}
-
-function applyTheme(themeId) {
-  const theme = themes.themes.find(t => t.id === themeId);
-  if (!theme) return;
-  // Appliquer les styles à l'éditeur
-  const wrapper = editor.getWrapperElement();
-  wrapper.style.background = theme.editor.background;
-  wrapper.style.color = theme.editor.color;
-  wrapper.style.border = `1px solid ${theme.editor.border}`;
-  // Appliquer la classe de thème pour la coloration syntaxique
-  document.body.className = `theme-${themeId}`;
-  // Appliquer les styles à la prévisualisation
-  preview.style.background = theme.preview.background;
-  preview.style.color = theme.preview.color;
-  // Appliquer les styles à la sidebar et toolbar
-  sidebar.style.background = theme.sidebar.background;
-  sidebar.style.color = theme.sidebar.color;
-  document.querySelector('.toolbar').style.background = theme.toolbar.background;
-  document.querySelector('.toolbar').style.color = theme.toolbar.color;
-  // Appliquer le style au body
-  document.body.style.background = theme.body.background;
-}
-
+// Initialiser l'éditeur avant d'essayer d'appliquer un thème
 async function initEditor() {
   const textarea = document.getElementById('editor');
+  if (!textarea) {
+    console.error('Textarea #editor not found');
+    return;
+  }
+  
   editor = CodeMirror.fromTextArea(textarea, {
     mode: 'markdown',
     lineNumbers: true,
     lineWrapping: true,
-    theme: 'custom', // Thème personnalisé défini dans main.css
-    scrollbarStyle: 'overlay',
-    viewportMargin: 10
+    theme: 'default',
+    // Suppression de scrollbarStyle qui cause des problèmes
+    viewportMargin: Infinity,
+    readOnly: false,
+    extraKeys: {
+      'Ctrl-S': () => saveFileBtn.click(),
+      'Cmd-S': () => saveFileBtn.click()
+    }
   });
+
   editor.on('change', () => {
-    preview.innerHTML = marked.parse(editor.getValue());
+    const content = editor.getValue() || '';
+    preview.innerHTML = marked.parse(content);
   });
+
+  // Synchronisation du défilement
   editor.on('scroll', () => {
     const scrollInfo = editor.getScrollInfo();
     const scrollPercentage = scrollInfo.top / (scrollInfo.height - scrollInfo.clientHeight);
-    preview.scrollTop = scrollPercentage * (preview.scrollHeight - preview.clientHeight);
+    if (!isNaN(scrollPercentage)) {
+      preview.scrollTop = scrollPercentage * (preview.scrollHeight - preview.clientHeight);
+    }
   });
+
   preview.addEventListener('scroll', () => {
     const scrollPercentage = preview.scrollTop / (preview.scrollHeight - preview.clientHeight);
-    const scrollInfo = editor.getScrollInfo();
-    editor.scrollTo(0, scrollPercentage * (scrollInfo.height - scrollInfo.clientHeight));
+    if (!isNaN(scrollPercentage)) {
+      const scrollInfo = editor.getScrollInfo();
+      editor.scrollTo(0, scrollPercentage * (scrollInfo.height - scrollInfo.clientHeight));
+    }
   });
+
+  editor.focus();
+  
+  // Charger les thèmes après l'initialisation de l'éditeur
+  await loadThemes();
+}
+
+async function loadThemes() {
+  try {
+    themes = await window.electronAPI.getThemes();
+    themeSelector.innerHTML = themes.themes.map(theme =>
+      `<option value="${theme.id}">${theme.name}</option>`
+    ).join('');
+    
+    // S'assurer que themes.themes existe et n'est pas vide
+    if (themes.themes && themes.themes.length > 0) {
+      themeSelector.value = themes.themes[0].id;
+      applyTheme(themes.themes[0].id);
+    }
+  } catch (error) {
+    console.error('Error loading themes:', error);
+  }
+}
+
+function applyTheme(themeId) {
+  // Vérifier que editor est défini et que themes.themes existe
+  if (!editor || !themes.themes) return;
+  
+  const theme = themes.themes.find(t => t.id === themeId);
+  if (!theme) return;
+
+  // Appliquer la classe de thème au body
+  document.body.className = `theme-${themeId}`;
+
+  // Appliquer le thème à CodeMirror de façon sécurisée
+  if (editor.setOption) {
+    editor.setOption('theme', theme.editor.codemirrorTheme);
+  }
+
+  // Appliquer les styles CSS via variables
+  document.documentElement.style.setProperty('--editor-bg', theme.editor.background);
+  document.documentElement.style.setProperty('--editor-color', theme.editor.color);
+  document.documentElement.style.setProperty('--editor-border', theme.editor.border);
+  document.documentElement.style.setProperty('--preview-bg', theme.preview.background);
+  document.documentElement.style.setProperty('--preview-color', theme.preview.color);
+  document.documentElement.style.setProperty('--sidebar-bg', theme.sidebar.background);
+  document.documentElement.style.setProperty('--sidebar-color', theme.sidebar.color);
+  document.documentElement.style.setProperty('--toolbar-bg', theme.toolbar.background);
+  document.documentElement.style.setProperty('--toolbar-color', theme.toolbar.color);
+  document.documentElement.style.setProperty('--body-bg', theme.body.background);
+  document.documentElement.style.setProperty('--button-bg', themeId === 'light' ? '#e0e0e0' : '#44475a');
+  document.documentElement.style.setProperty('--button-hover', themeId === 'light' ? '#d0d0d0' : '#555770');
 }
 
 themeSelector.addEventListener('change', () => {
@@ -83,42 +127,66 @@ themeSelector.addEventListener('change', () => {
 });
 
 newFileBtn.addEventListener('click', () => {
+  if (!editor) return;
   editor.setValue('');
   preview.innerHTML = '';
   currentFilePath = null;
 });
 
 openFileBtn.addEventListener('click', async () => {
-  const result = await window.electronAPI.openFile();
-  if (result) {
-    editor.setValue(result.content);
-    preview.innerHTML = marked.parse(result.content);
-    currentFilePath = result.filePath;
+  if (!editor) return;
+  try {
+    const result = await window.electronAPI.openFile();
+    if (result) {
+      editor.setValue(result.content);
+      preview.innerHTML = marked.parse(result.content);
+      currentFilePath = result.filePath;
+    }
+  } catch (error) {
+    console.error('Error opening file:', error);
+    alert('Erreur lors de l\'ouverture du fichier.');
   }
 });
 
 saveFileBtn.addEventListener('click', async () => {
-  const content = editor.getValue();
-  const filePath = await window.electronAPI.saveFile(content, currentFilePath);
-  if (filePath) {
-    currentFilePath = filePath;
-    alert(`Fichier sauvegardé à : ${filePath}`);
+  if (!editor) return;
+  try {
+    const content = editor.getValue();
+    const filePath = await window.electronAPI.saveFile(content, currentFilePath);
+    if (filePath) {
+      currentFilePath = filePath;
+      alert(`Fichier sauvegardé à : ${filePath}`);
+    }
+  } catch (error) {
+    console.error('Error saving file:', error);
+    alert('Erreur lors de la sauvegarde du fichier.');
   }
 });
 
 exportPdfBtn.addEventListener('click', async () => {
-  const content = editor.getValue();
-  const filePath = await window.electronAPI.exportPDF(content);
-  if (filePath) {
-    alert(`PDF exporté à : ${filePath}`);
+  if (!editor) return;
+  try {
+    const content = editor.getValue();
+    const filePath = await window.electronAPI.exportPDF(content);
+    if (filePath) {
+      alert(`PDF exporté à : ${filePath}`);
+    }
+  } catch (error) {
+    console.error('Error exporting PDF:', error);
+    alert('Erreur lors de l\'exportation du PDF.');
   }
 });
 
 newProjectBtn.addEventListener('click', async () => {
-  const projectName = await window.electronAPI.promptProjectName();
-  if (projectName) {
-    await window.electronAPI.createProject(projectName);
-    loadProjects();
+  try {
+    const projectName = await window.electronAPI.promptProjectName();
+    if (projectName) {
+      await window.electronAPI.createProject(projectName);
+      loadProjects();
+    }
+  } catch (error) {
+    console.error('Error creating project:', error);
+    alert('Erreur lors de la création du projet.');
   }
 });
 
@@ -127,45 +195,83 @@ toggleSidebarBtn.addEventListener('click', () => {
 });
 
 async function loadProjects() {
-  const projects = await window.electronAPI.getProjects();
-  projectList.innerHTML = '';
-  for (const project of projects) {
-    const projectItem = document.createElement('li');
-    projectItem.textContent = project.name;
-    projectItem.dataset.path = project.path;
-    projectItem.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const projectPath = projectItem.dataset.path;
-      console.log('Sending projectPath:', projectPath);
-      if (!projectPath) {
-        console.error('Project path is undefined');
-        return;
-      }
-      try {
-        const files = await window.electronAPI.getProjectFiles(projectPath);
-        projectItem.innerHTML = `${project.name}<ul>${files.map(file =>
-          `<li class="file" data-path="${file.path}">${file.name}</li>`
-        ).join('')}</ul>`;
-        projectItem.querySelectorAll('.file').forEach(fileItem => {
-          fileItem.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const result = await window.electronAPI.openFile(fileItem.dataset.path);
-            if (result) {
-              editor.setValue(result.content);
-              preview.innerHTML = marked.parse(result.content);
-              currentFilePath = result.filePath;
-            }
+  try {
+    const projects = await window.electronAPI.getProjects();
+    projectList.innerHTML = '';
+    for (const project of projects) {
+      const projectItem = document.createElement('li');
+      projectItem.dataset.path = project.path;
+      projectItem.innerHTML = `
+        <div class="project-header">
+          <span>${project.name}</span>
+          <button class="new-file-project-btn" data-project-path="${project.path}">+</button>
+        </div>
+        <ul class="file-list"></ul>
+      `;
+      projectList.appendChild(projectItem);
+
+      // Gestion du clic sur le projet pour afficher les fichiers
+      projectItem.querySelector('.project-header').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const projectPath = projectItem.dataset.path;
+        if (!projectPath) {
+          console.error('Project path is undefined');
+          return;
+        }
+        try {
+          const files = await window.electronAPI.getProjectFiles(projectPath);
+          const fileList = projectItem.querySelector('.file-list');
+          fileList.innerHTML = files.map(file =>
+            `<li class="file" data-path="${file.path}">${file.name}</li>`
+          ).join('');
+          fileList.querySelectorAll('.file').forEach(fileItem => {
+            fileItem.addEventListener('click', async (e) => {
+              e.stopPropagation();
+              if (!editor) return;
+              try {
+                const result = await window.electronAPI.openFile(fileItem.dataset.path);
+                if (result) {
+                  editor.setValue(result.content);
+                  preview.innerHTML = marked.parse(result.content);
+                  currentFilePath = result.filePath;
+                }
+              } catch (error) {
+                console.error('Error opening file:', error);
+                alert('Erreur lors de l\'ouverture du fichier.');
+              }
+            });
           });
-        });
-      } catch (error) {
-        console.error('Error loading project files:', error);
-      }
-    });
-    projectList.appendChild(projectItem);
+        } catch (error) {
+          console.error('Error loading project files:', error);
+          alert('Erreur lors du chargement des fichiers du projet.');
+        }
+      });
+
+      // Gestion du clic sur le bouton "Nouveau Fichier"
+      projectItem.querySelector('.new-file-project-btn').addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+          const projectPath = e.target.dataset.projectPath;
+          const fileName = await window.electronAPI.promptFileName();
+          if (fileName) {
+            const filePath = await window.electronAPI.createFile(projectPath, fileName);
+            projectItem.querySelector('.project-header').click(); // Rafraîchir la liste des fichiers
+            alert(`Fichier créé : ${filePath}`);
+          }
+        } catch (error) {
+          console.error('Error creating file:', error);
+          alert('Erreur lors de la création du fichier.');
+        }
+      });
+    }
+  } catch (error) {
+    console.error('Error loading projects:', error);
+    alert('Erreur lors du chargement des projets.');
   }
 }
 
-initEditor();
-loadThemes();
-loadProjects();
-preview.innerHTML = marked.parse('');
+// Initialiser l'éditeur d'abord, puis charger les thèmes et projets
+initEditor().then(() => {
+  loadProjects();
+  preview.innerHTML = marked.parse('');
+});
