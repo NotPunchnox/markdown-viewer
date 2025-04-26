@@ -20,7 +20,6 @@ const projectList = document.getElementById('project-list');
 let currentFilePath = null;
 let themes = [];
 
-// Charger les thèmes
 async function loadThemes() {
   themes = await window.electronAPI.getThemes();
   themeSelector.innerHTML = themes.themes.map(theme => 
@@ -29,42 +28,31 @@ async function loadThemes() {
   applyTheme(themes.themes[0].id);
 }
 
-// Appliquer un thème
 function applyTheme(themeId) {
   const theme = themes.themes.find(t => t.id === themeId);
   if (!theme) return;
-
-  // Appliquer les styles à l'éditeur
   editor.style.background = theme.editor.background;
   editor.style.color = theme.editor.color;
   editor.style.border = `1px solid ${theme.editor.border}`;
-
-  // Appliquer les styles à la prévisualisation
   preview.style.background = theme.preview.background;
   preview.style.color = theme.preview.color;
-
-  // Mettre à jour la classe du body pour d'autres éléments
   document.body.className = `theme-${themeId}`;
 }
 
-// Mettre à jour la prévisualisation en temps réel
 editor.addEventListener('input', () => {
   preview.innerHTML = marked.parse(editor.value);
 });
 
-// Changer de thème
 themeSelector.addEventListener('change', () => {
   applyTheme(themeSelector.value);
 });
 
-// Nouveau fichier
 newFileBtn.addEventListener('click', () => {
   editor.value = '';
   preview.innerHTML = '';
   currentFilePath = null;
 });
 
-// Ouvrir un fichier
 openFileBtn.addEventListener('click', async () => {
   const result = await window.electronAPI.openFile();
   if (result) {
@@ -74,7 +62,6 @@ openFileBtn.addEventListener('click', async () => {
   }
 });
 
-// Sauvegarder le fichier
 saveFileBtn.addEventListener('click', async () => {
   const content = editor.value;
   const filePath = await window.electronAPI.saveFile(content, currentFilePath);
@@ -84,7 +71,6 @@ saveFileBtn.addEventListener('click', async () => {
   }
 });
 
-// Exporter en PDF
 exportPdfBtn.addEventListener('click', async () => {
   const content = editor.value;
   const filePath = await window.electronAPI.exportPDF(content);
@@ -93,9 +79,8 @@ exportPdfBtn.addEventListener('click', async () => {
   }
 });
 
-// Gestion des projets
 newProjectBtn.addEventListener('click', async () => {
-  const projectName = window.prompt('Nom du projet :'); // Utilisation de window.prompt
+  const projectName = await window.electronAPI.promptProjectName();
   if (projectName) {
     await window.electronAPI.createProject(projectName);
     loadProjects();
@@ -130,7 +115,6 @@ async function loadProjects() {
   }
 }
 
-// Initialisation
 loadThemes();
 loadProjects();
 preview.innerHTML = marked.parse(editor.value);

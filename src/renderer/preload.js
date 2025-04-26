@@ -5,6 +5,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openFile: (filePath) => ipcRenderer.invoke('open-file', filePath),
   exportPDF: (content, filePath) => ipcRenderer.invoke('export-pdf', content, filePath),
   createProject: (projectName) => ipcRenderer.invoke('create-project', projectName),
+  promptProjectName: () => ipcRenderer.invoke('prompt-project-name'),
   getProjects: () => ipcRenderer.invoke('get-projects'),
   getProjectFiles: (projectPath) => ipcRenderer.invoke('get-project-files'),
   getThemes: () => ipcRenderer.invoke('get-themes'),

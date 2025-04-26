@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require('electron');
 const path = require('path');
 const fs = require('fs-extra');
 const { exportToPDF } = require('./pdfExporter');
+const prompt = require('electron-prompt');
 
 let mainWindow;
 
@@ -78,6 +79,18 @@ ipcMain.handle('create-project', async (event, projectName) => {
   const projectDir = path.join(app.getPath('documents'), 'MarkdownProjects', projectName);
   await fs.ensureDir(projectDir);
   return projectDir;
+});
+
+ipcMain.handle('prompt-project-name', async () => {
+  return await prompt({
+    title: 'Nouveau Projet',
+    label: 'Nom du projet :',
+    value: '',
+    inputAttrs: { type: 'text' },
+    type: 'input',
+    width: 400,
+    height: 200,
+  }, mainWindow);
 });
 
 ipcMain.handle('get-projects', async () => {
