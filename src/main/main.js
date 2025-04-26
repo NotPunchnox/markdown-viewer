@@ -45,14 +45,17 @@ ipcMain.handle('save-file', async (event, content, filePath) => {
   return null;
 });
 
-ipcMain.handle('open-file', async () => {
-  const { filePaths } = await dialog.showOpenDialog({
-    filters: [{ name: 'Markdown', extensions: ['md'] }],
-    properties: ['openFile'],
-  });
-  if (filePaths && filePaths.length > 0) {
-    const content = await fs.readFile(filePaths[0], 'utf-8');
-    return { filePath: filePaths[0], content };
+ipcMain.handle('open-file', async (event, filePath) => {
+  if (!filePath) {
+    const { filePaths } = await dialog.showOpenDialog({
+      filters: [{ name: 'Markdown', extensions: ['md'] }],
+      properties: ['openFile'],
+    });
+    filePath = filePaths && filePaths.length > 0 ? filePaths[0] : null;
+  }
+  if (filePath) {
+    const content = await fs.readFile(filePath, 'utf-8');
+    return { filePath, content };
   }
   return null;
 });
