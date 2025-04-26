@@ -1,7 +1,7 @@
 let editor;
 
 marked.setOptions({
-  highlight: function(code, lang) {
+  highlight: function (code, lang) {
     if (lang && hljs.getLanguage(lang)) {
       return hljs.highlight(code, { language: lang }).value;
     }
@@ -25,7 +25,7 @@ let themes = [];
 
 async function loadThemes() {
   themes = await window.electronAPI.getThemes();
-  themeSelector.innerHTML = themes.themes.map(theme => 
+  themeSelector.innerHTML = themes.themes.map(theme =>
     `<option value="${theme.id}">${theme.name}</option>`
   ).join('');
   applyTheme(themes.themes[0].id);
@@ -34,17 +34,23 @@ async function loadThemes() {
 function applyTheme(themeId) {
   const theme = themes.themes.find(t => t.id === themeId);
   if (!theme) return;
-  editor.getWrapperElement().style.background = theme.editor.background;
-  editor.getWrapperElement().style.color = theme.editor.color;
-  editor.getWrapperElement().style.border = `1px solid ${theme.editor.border}`;
+  // Appliquer les styles à l'éditeur
+  const wrapper = editor.getWrapperElement();
+  wrapper.style.background = theme.editor.background;
+  wrapper.style.color = theme.editor.color;
+  wrapper.style.border = `1px solid ${theme.editor.border}`;
+  // Appliquer la classe de thème pour la coloration syntaxique
+  document.body.className = `theme-${themeId}`;
+  // Appliquer les styles à la prévisualisation
   preview.style.background = theme.preview.background;
   preview.style.color = theme.preview.color;
+  // Appliquer les styles à la sidebar et toolbar
   sidebar.style.background = theme.sidebar.background;
   sidebar.style.color = theme.sidebar.color;
   document.querySelector('.toolbar').style.background = theme.toolbar.background;
   document.querySelector('.toolbar').style.color = theme.toolbar.color;
+  // Appliquer le style au body
   document.body.style.background = theme.body.background;
-  document.body.className = `theme-${themeId}`;
 }
 
 async function initEditor() {
@@ -52,8 +58,10 @@ async function initEditor() {
   editor = CodeMirror.fromTextArea(textarea, {
     mode: 'markdown',
     lineNumbers: true,
-    theme: 'default',
-    lineWrapping: true
+    lineWrapping: true,
+    theme: 'custom', // Thème personnalisé défini dans main.css
+    scrollbarStyle: 'overlay',
+    viewportMargin: 10
   });
   editor.on('change', () => {
     preview.innerHTML = marked.parse(editor.getValue());
@@ -135,7 +143,7 @@ async function loadProjects() {
       }
       try {
         const files = await window.electronAPI.getProjectFiles(projectPath);
-        projectItem.innerHTML = `${project.name}<ul>${files.map(file => 
+        projectItem.innerHTML = `${project.name}<ul>${files.map(file =>
           `<li class="file" data-path="${file.path}">${file.name}</li>`
         ).join('')}</ul>`;
         projectItem.querySelectorAll('.file').forEach(fileItem => {

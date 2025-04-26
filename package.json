@@ -6,7 +6,8 @@
   "author": "punchnox",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder"
+    "build": "electron-builder",
+    "dev": "electronmon ."
   },
   "dependencies": {
     "codemirror": "^5.65.19",
@@ -17,7 +18,8 @@
   },
   "devDependencies": {
     "electron": "^28.2.3",
-    "electron-builder": "^24.9.1"
+    "electron-builder": "^24.9.1",
+    "electronmon": "^2.0.3"
   },
   "build": {
     "appId": "com.example.markdowneditor",

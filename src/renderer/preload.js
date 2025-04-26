@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   exportPDF: (content, filePath) => ipcRenderer.invoke('export-pdf', content, filePath),
   createProject: (projectName) => ipcRenderer.invoke('create-project', projectName),
   promptProjectName: () => ipcRenderer.invoke('prompt-project-name'),
+  promptFileName: () => ipcRenderer.invoke('prompt-file-name'),
+  createFile: (projectPath, fileName) => ipcRenderer.invoke('create-file', projectPath, fileName),
   getProjects: () => ipcRenderer.invoke('get-projects'),
   getProjectFiles: (projectPath) => {
     console.log('IPC Sending projectPath:', projectPath); // Débogage
