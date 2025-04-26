@@ -255,7 +255,9 @@ async function loadProjects() {
           const fileName = await window.electronAPI.promptFileName();
           if (fileName) {
             const filePath = await window.electronAPI.createFile(projectPath, fileName);
-            projectItem.querySelector('.project-header').click(); // Rafraîchir la liste des fichiers
+            
+            // Rafraîchir la liste des fichiers
+            projectItem.querySelector('.project-header').click();
             alert(`Fichier créé : ${filePath}`);
           }
         } catch (error) {
@@ -270,7 +272,7 @@ async function loadProjects() {
   }
 }
 
-// Initialiser l'éditeur d'abord, puis charger les thèmes et projets
+// Initialiser l'éditeur, puis charger les thèmes et projets
 initEditor().then(() => {
   loadProjects();
   preview.innerHTML = marked.parse('');

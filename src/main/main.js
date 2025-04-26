@@ -92,6 +92,27 @@ ipcMain.handle('prompt-project-name', async () => {
   }, mainWindow);
 });
 
+ipcMain.handle('prompt-file-name', async () => {
+  return await prompt({
+    title: 'Nouveau Fichier',
+    label: 'Nom du fichier (avec .md) :',
+    value: 'nouveau.md',
+    inputAttrs: { type: 'text' },
+    type: 'input',
+    width: 400,
+    height: 200,
+  }, mainWindow);
+});
+
+ipcMain.handle('create-file', async (event, projectPath, fileName) => {
+  if (!projectPath || !fileName) {
+    throw new Error('Invalid project path or file name');
+  }
+  const filePath = path.join(projectPath, fileName);
+  await fs.writeFile(filePath, ''); // Créer un fichier vide
+  return filePath;
+});
+
 ipcMain.handle('get-projects', async () => {
   const projectsDir = path.join(app.getPath('documents'), 'MarkdownProjects');
   await fs.ensureDir(projectsDir);
