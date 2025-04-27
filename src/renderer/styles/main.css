@@ -329,6 +329,7 @@ body {
 }
 
 .CodeMirror {
+  width: 100%;
   height: 100% !important;
   font-family: 'Fira Code', 'SFMono-Regular', Consolas, monospace;
   font-size: 14px;
@@ -431,6 +432,10 @@ body {
   color: #f92672;
 }
 
+.CodeMirror .CodeMirror-wrap .cm-s-dracula {
+  width: 100%;
+}
+
 /* Preview container */
 .preview-container {
   grid-area: preview;
@@ -440,7 +445,7 @@ body {
 }
 
 #preview {
-  max-width: 800px;
+  width: 100%;
   margin: 0 auto;
   line-height: 1.6;
   color: var(--text-color);
